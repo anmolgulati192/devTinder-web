@@ -8,6 +8,20 @@ const Requests = () => {
   const requests = useSelector((state) => state.requests);
   console.log("Requests:", requests);
   const dispatch = useDispatch();
+
+  const reviewRequest = async (requestId, action) => {
+    try {
+      await axios.post(
+        `${BASE_URL}/request/review/${action}/${requestId}`,
+        {},
+        { withCredentials: true }
+      );
+      fetchRequests(); // Refresh the requests list
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchRequests = async () => {
     try {
       const response = await axios.get(BASE_URL + "/user/requests/received", {
@@ -24,43 +38,55 @@ const Requests = () => {
   }, []);
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4 text-center">Requests</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center my-2">
+        Connection Requests
+      </h1>
       {requests && requests.length > 0 ? (
         <ul className="space-y-4">
-          {requests.map(({ fromUserId }) => (
+          {requests.map((req) => (
             <li
-              key={fromUserId._id}
+              key={req?.fromUserId._id}
               className="p-4 border rounded-lg shadow-sm flex items-center gap-4 w-1/3 mx-auto bg-stone-100"
             >
               <img
                 src={
-                  fromUserId.photoUrl
-                    ? fromUserId.photoUrl
+                  req?.fromUserId.photoUrl
+                    ? req?.fromUserId.photoUrl
                     : "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
                 }
-                alt={`${fromUserId.firstName} ${fromUserId.lastName}`}
+                alt={`${req?.fromUserId.firstName} ${req?.fromUserId.lastName}`}
                 className="w-16 h-16 rounded-full object-cover"
               />
               <div>
                 <h2 className="text-xl font-semibold">
-                  {fromUserId.firstName} {fromUserId.lastName}
+                  {req?.fromUserId.firstName} {req?.fromUserId.lastName}
                 </h2>
-                {fromUserId.age && fromUserId.gender && (
+                {req?.fromUserId.age && req?.fromUserId.gender && (
                   <p className="text-gray-600">
-                    {fromUserId.age + ", " + fromUserId.gender}
+                    {req?.fromUserId.age + ", " + req?.fromUserId.gender}
                   </p>
                 )}
-                <p className="text-gray-600">{fromUserId.about}</p>
+                <p className="text-gray-600">{req?.fromUserId.about}</p>
               </div>
               <div className="flex gap-2 ml-auto">
-                <button className="btn btn-primary">Reject</button>
-                <button className="btn btn-secondary">Accept</button>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => reviewRequest(req._id, "rejected")}
+                >
+                  Reject
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => reviewRequest(req._id, "accepted")}
+                >
+                  Accept
+                </button>
               </div>
             </li>
           ))}
         </ul>
       ) : (
-        <p>No requests found.</p>
+        <p className="flex justify-center">No requests found.</p>
       )}
     </div>
   );

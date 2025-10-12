@@ -3,6 +3,7 @@ import { BASE_URL } from "../utils/constants";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addConnections } from "../utils/connectionSlice";
+import { Link } from "react-router-dom";
 
 const Connections = () => {
   const connections = useSelector((state) => state.connections);
@@ -52,6 +53,9 @@ const Connections = () => {
                 )}
                 <p className="text-gray-600">{conn.about}</p>
               </div>
+              <Link to={"/chat/" + conn._id} className="ml-auto">
+                <button className="btn btn-primary">Chat</button>
+              </Link>
             </li>
           ))}
         </ul>
